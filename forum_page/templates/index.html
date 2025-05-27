@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Web Chat Forum</title>
+    <!-- Socket.IO client -->
+    <!-- socket.io-client v4.x -->
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.min.js"></script>
+    <style>
+      body { font-family: sans-serif; max-width: 600px; margin: 2em auto; }
+      #messages { list-style: none; padding: 0; }
+      #messages li { padding: 0.5em; border-bottom: 1px solid #eee; }
+      #controls { margin-top: 1em; }
+    </style>
+  </head>
+  <body>
+    <h1>LAN Chat Forum</h1>
+    <ul id="messages"></ul>
+
+    <div id="controls">
+      <input id="nickname" placeholder="Your nickname" /><br><br>
+      <input id="message" placeholder="Type a message…" style="width:80%" />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+    // must come after you load socket.io.js
+    const socket = io();  
+    socket.on('connect', () => console.log('✔️ Socket connected as', socket.id));
+    socket.on('connect_error', err => console.error('❌ Connection error', err));
+    socket.on('message', msg => {
+        console.log('← got:', msg);
+        const li = document.createElement('li');
+        li.textContent = msg;
+        document.getElementById('messages').appendChild(li);
+        window.scrollTo(0, document.body.scrollHeight);
+    });
+
+    function sendMessage() {
+        const nick = document.getElementById('nickname').value || 'Anon';
+        const text = document.getElementById('message').value.trim();
+        if (!text) return;
+        console.log('→ send:', `${nick}: ${text}`);
+        socket.send(`${nick}: ${text}`);
+        document.getElementById('message').value = '';
+    }
+    </script>
+  </body>
+</html>
